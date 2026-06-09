@@ -27,7 +27,6 @@ Installation
 Prerequisites
 - Python 3.9+ (or Node 16+ if implemented in JavaScript)
 - Git
-- Docker (optional, recommended for deployment)
 
 Clone the repository
 
