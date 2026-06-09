@@ -12,5 +12,9 @@ wheels/
 # Enviroment variables and credentials
 .env
 
+
+# Local config
+.python-version
+
 # Notebooks
 lab_proveedores_IA.ipynb
