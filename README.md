@@ -15,16 +15,10 @@ When to use
 Repository structure
 ```
 financial-agent/
-├── src/                     # Application source code
-│   ├── providers/           # Provider adapters (one per service)
-│   ├── core/                # Core agent logic, routing, fallback, memory
-│   └── cli/                 # Command-line or server entry-points
-├── config/                  # Configuration examples and templates
-├── tests/                   # Unit and integration tests
-├── scripts/                 # Helper scripts (deployment, setup)
-├── Dockerfile               # Container image definition
-├── docker-compose.yml       # Optional local compose definition
-├── requirements.txt         # Python dependencies (or package.json for JS)
+├── providers/                     # Provider adapters (one per service)
+├── core/                    # Core agent logic, routing, fallback, memory
+├── main.py
+├── pyproject.toml           # Python dependencies (or package.json for JS)
 └── README.md                # Project documentation
 ```
 
@@ -66,26 +60,6 @@ Copy an example config from config/ and set API keys and provider-specific optio
 ```
 python -m src.cli.main
 ```
-
-Docker (recommended)
-
-1. Build the image
-
-```
-docker build -t financial-agent:latest .
-```
-
-2. Run the container (example)
-
-```
-docker run --rm -e CONFIG_PATH=/app/config/prod.yaml -p 8080:8080 financial-agent:latest
-```
-
-Deployment
-
-- Use the provided Dockerfile and docker-compose.yml for simple deployments.
-- For production, run behind a reverse proxy and provide secure configuration for API keys (environment variables or a secrets manager).
-- Monitor provider health and configure alerting; the agent will attempt fallback routing but monitoring helps track degraded performance.
 
 Memory and cost control
 
