@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 
 from core import ConversationManager, FallbackChatbot
-from providers import AzureOpenAIProvider, GeminiProvider, OllamaProvider, select_provider
+from providers import AzureOpenAIProvider, GeminiProvider, OllamaProvider,
+from utils.provider_utils import select_provider
 
 load_dotenv()
 
