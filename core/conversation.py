@@ -10,7 +10,12 @@ class ConversationManager:
 
     def __init__(self, system_prompt: str, max_messages: int = 10):
         self.system_prompt = system_prompt
-        self.history = []
+        self.history = [
+            {
+                "role": "developer",
+                "content": system_prompt,
+            }
+        ]
         self.max_messages = max_messages
 
     def get_api_history(self) -> list:
@@ -21,8 +26,10 @@ class ConversationManager:
         """
         if len(self.history) > self.max_messages + 1:
             # Calculamos si el historial (sin contar el system_message) supera el límite
-            api_history = self.history[-self.max_messages :]
-            return api_history
+            developer_message = self.history[0]
+            recent_messages = self.history[1:]
+
+            return [developer_message] + recent_messages[-self.max_messages :]
         else:
             return self.history
 
@@ -31,6 +38,14 @@ class ConversationManager:
 
     def get_system_prompt(self) -> str:
         return self.system_prompt
+
+    def clean_history(self):
+        self.history = [
+            {
+                "role": "developer",
+                "content": self.system_prompt,
+            }
+        ]
 
     def add_message(self, role: str, message: str):
         self.history.append({"role": role, "content": message})

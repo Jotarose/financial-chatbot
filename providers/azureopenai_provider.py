@@ -13,7 +13,7 @@ class AzureOpenAIProvider(AIProvider):
             response_stream = self.client.responses.create(
                 model="gpt-5.4-mini",
                 input=messages,
-                instructions=self.system_prompt,
+                instructions=messages[0]["content"],
                 temperature=0.7,
                 top_p=0.9,
                 max_output_tokens=max_output_tokens,

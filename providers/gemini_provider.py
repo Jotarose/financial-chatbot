@@ -16,10 +16,14 @@ class GeminiProvider(AIProvider):
 
         # Adapt the message format to Gemini's expected input
         gemini_history = []
+        system_instruction = None
 
         for message in messages:
             if message["role"] == "assistant":
                 gemini_history.append({"role": "model", "parts": [{"text": message["content"]}]})
+            elif message["role"] == "developer":
+                system_instruction = message["content"]
+
             else:
                 gemini_history.append({"role": "user", "parts": [{"text": message["content"]}]})
 
@@ -28,7 +32,7 @@ class GeminiProvider(AIProvider):
                 model="gemini-2.5-flash",
                 contents=gemini_history,
                 config=types.GenerateContentConfig(
-                    system_instruction=self.system_prompt,
+                    system_instruction=system_instruction,
                     temperature=0.7,
                     top_p=0.9,
                     max_output_tokens=max_output_tokens,

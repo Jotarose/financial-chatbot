@@ -16,6 +16,9 @@ class FallbackChatbot:
         self.fallback_provider = fallback_provider
         self.conversation = conversation_manager
 
+    def clean_history(self):
+        self.conversation.clean_history()
+
     def generate_streaming_response(self, user_message: str):
         # Add the user's message to the conversation history
         self.conversation.add_message("user", user_message)
