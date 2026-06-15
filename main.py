@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 from core import ConversationManager, FallbackChatbot
-from providers import AzureOpenAIProvider, GeminiProvider, select_provider
+from providers import AzureOpenAIProvider, GeminiProvider, OllamaProvider, select_provider
 
 load_dotenv()
 
@@ -17,6 +17,10 @@ def main():
         "azureopenai": AzureOpenAIProvider(
             api_key=os.getenv("OPENAI_API_KEY"),
             endpoint=os.getenv("OPENAI_BASE_URL"),
+        ),
+        "ollama": OllamaProvider(
+            api_key=os.getenv("OLLAMA_API_KEY"),
+            endpoint=os.getenv("OLLAMA_BASE_URL"),
         ),
     }
     main_provider, fallback_provider = select_provider(providers)
