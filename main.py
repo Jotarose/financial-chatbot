@@ -14,14 +14,19 @@ def main():
 
     # Configure all the setup
     providers = {
-        "gemini": GeminiProvider(api_key=os.getenv("GEMINI_API_KEY")),
+        "gemini": GeminiProvider(
+            api_key=os.getenv("GEMINI_API_KEY"),
+            name="Gemini",
+        ),
         "azureopenai": AzureOpenAIProvider(
             api_key=os.getenv("OPENAI_API_KEY"),
             endpoint=os.getenv("OPENAI_BASE_URL"),
+            name="Azure OpenAI",
         ),
         "ollama": OllamaProvider(
             api_key=os.getenv("OLLAMA_API_KEY"),
             endpoint=os.getenv("OLLAMA_BASE_URL"),
+            name="Ollama (Local)",
         ),
     }
     main_provider, fallback_provider = select_provider(providers)
@@ -56,7 +61,10 @@ def main():
             case "/cambiar":
                 main_provider, fallback_provider = select_provider(providers)
                 chatbot.change_provider(main_provider, fallback_provider)
-                print(f"Assistant: Proveedor principal cambiado a {main_provider}\n")
+                names = chatbot.get_providers_names()
+                print(
+                    f"Assistant: Proveedor principal cambiado a {names[0]} y el proveedor de fallback a cambiado a {names[1]}\n"
+                )
                 continue
 
             case "/ayuda":
@@ -64,7 +72,11 @@ def main():
                 continue
 
             case "/estadisticas":
-                pass
+                statistics = chatbot.get_statistics()
+                print("\nESTADISTICAS DE LA SESION:")
+                for key, value in statistics.items():
+                    print(f"- {key.capitalize()}: {value}")
+                continue
 
             case _:
                 pass
