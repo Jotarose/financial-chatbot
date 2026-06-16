@@ -4,8 +4,8 @@ from .generic_provider import AIProvider, AIProviderError
 
 
 class OllamaProvider(AIProvider):
-    def __init__(self, api_key: str, endpoint: str):
-        super().__init__(api_key)
+    def __init__(self, api_key: str, endpoint: str, name: str):
+        super().__init__(api_key, name)
         self.client = OpenAI(api_key=api_key, base_url=endpoint)
 
     def generate_streaming_response(self, messages: list, max_output_tokens: int = 1024):

@@ -31,7 +31,7 @@ def main():
     conversation_manager = ConversationManager(system_prompt=system_prompt, max_messages=10)
 
     chatbot = FallbackChatbot(
-        primary_provider=main_provider,
+        main_provider=main_provider,
         fallback_provider=fallback_provider,
         conversation_manager=conversation_manager,
     )
@@ -54,8 +54,10 @@ def main():
                 continue
 
             case "/cambiar":
-                # Tengo que mantener el contexto de la memoria
-                pass
+                main_provider, fallback_provider = select_provider(providers)
+                chatbot.change_provider(main_provider, fallback_provider)
+                print(f"Assistant: Proveedor principal cambiado a {main_provider}\n")
+                continue
 
             case "/ayuda":
                 show_commands()

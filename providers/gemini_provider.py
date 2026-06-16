@@ -6,8 +6,8 @@ from .generic_provider import AIProvider, AIProviderError
 
 
 class GeminiProvider(AIProvider):
-    def __init__(self, api_key: str):
-        super().__init__(api_key)
+    def __init__(self, api_key: str, name: str):
+        super().__init__(api_key, name)
         self.client = genai.Client(api_key=api_key)
 
     # set_system_prompt is not needed to be overridden since it just calls the parent method.

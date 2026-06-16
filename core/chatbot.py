@@ -8,16 +8,20 @@ class FallbackChatbot:
 
     def __init__(
         self,
-        primary_provider: AIProvider,
+        main_provider: AIProvider,
         fallback_provider: AIProvider,
         conversation_manager: ConversationManager,
     ):
-        self.primary_provider = primary_provider
+        self.main_provider = main_provider
         self.fallback_provider = fallback_provider
         self.conversation = conversation_manager
 
     def clean_history(self):
         self.conversation.clean_history()
+
+    def change_provider(self, main_provider: AIProvider, fallback_provider: AIProvider):
+        self.main_provider = main_provider
+        self.fallback_provider = fallback_provider
 
     def generate_streaming_response(self, user_message: str):
         # Add the user's message to the conversation history
@@ -27,8 +31,8 @@ class FallbackChatbot:
         full_response = ""
 
         try:
-            # Generate a streaming response from the primary provider
-            stream = self.primary_provider.generate_streaming_response(history)
+            # Generate a streaming response from the main provider
+            stream = self.main_provider.generate_streaming_response(history)
             for chunk in stream:
                 if chunk is not None:
                     full_response += chunk
@@ -36,7 +40,7 @@ class FallbackChatbot:
 
         # It can fail in the middle of the stream, so catch the error and fallback to the 2provider
         except AIProviderError as e:
-            print(f"Primary provider failed with error: {e}. Falling back to secondary provider.")
+            print(f"Main provider failed with error: {e}. Falling back to secondary provider.")
 
             if full_response:
                 yield "\n*[Inestable conection, switching to fallback provider...]*\n"
