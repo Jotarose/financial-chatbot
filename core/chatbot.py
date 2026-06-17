@@ -20,8 +20,8 @@ class FallbackChatbot:
         self.statistics = {
             "requests": 0,
             "usage_time": 0.0,
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
+            "total_input_tokens": 0,
+            "total_output_tokens": 0,
             "total_tokens": 0,
         }
 
@@ -38,12 +38,17 @@ class FallbackChatbot:
         self.main_provider = main_provider
         self.fallback_provider = fallback_provider
 
-    def _add_statistics(self, call_time, p_tokens=None, c_tokens=None):
+    def _add_statistics(self, call_time, final_usage: dict):
         """Método interno para acumular métricas después de cada llamada."""
+
+        input_tokens = final_usage.input_tokens
+        output_tokens = final_usage.output_tokens
+        total_tokens = final_usage.total_tokens
+
         self.statistics["requests"] += 1
-        # self.statistics["prompt_tokens"] += p_tokens
-        # self.statistics["completion_tokens"] += c_tokens
-        # self.statistics["total_tokens"] += (p_tokens + c_tokens)
+        self.statistics["total_input_tokens"] += input_tokens
+        self.statistics["total_output_tokens"] += output_tokens
+        self.statistics["total_tokens"] += total_tokens
         self.statistics["usage_time"] += call_time
 
     def generate_streaming_response(self, user_message: str):
@@ -54,14 +59,19 @@ class FallbackChatbot:
         history = self.conversation.get_api_history()
 
         full_response = ""
+        final_usage = None
 
         try:
             # Generate a streaming response from the main provider
             stream = self.main_provider.generate_streaming_response(history)
             for chunk in stream:
                 if chunk is not None:
-                    full_response += chunk
-                    yield chunk
+                    if isinstance(chunk, str):
+                        full_response += chunk
+                        yield chunk
+
+                    else:
+                        final_usage = chunk
 
         # It can fail in the middle of the stream, so catch the error and fallback to the 2provider
         except AIProviderError as e:
@@ -93,6 +103,6 @@ class FallbackChatbot:
         stop_time = time.perf_counter()
         call_time = round((stop_time - start_time) * 1000, 2)
 
-        self._add_statistics(call_time)
+        self._add_statistics(call_time, final_usage)
 
         return

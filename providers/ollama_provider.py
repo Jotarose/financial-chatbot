@@ -23,6 +23,8 @@ class OllamaProvider(AIProvider):
             for event in response_stream:
                 if event.type == "response.output_text.delta":
                     yield event.delta
+                if event.type == "response.completed":
+                    yield event.response.usage
 
         except OpenAIError as e:
             raise AIProviderError(f"Ollama Local API error: {e}") from e
