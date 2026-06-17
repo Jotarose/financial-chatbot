@@ -2,6 +2,7 @@ import time
 
 from core.conversation import ConversationManager
 from providers import AIProvider, AIProviderError
+from schemas.usage_metadata import UsageMetadata
 
 
 class FallbackChatbot:
@@ -38,7 +39,7 @@ class FallbackChatbot:
         self.main_provider = main_provider
         self.fallback_provider = fallback_provider
 
-    def _add_statistics(self, call_time, final_usage: dict):
+    def _add_statistics(self, call_time, final_usage: UsageMetadata | None):
         """Método interno para acumular métricas después de cada llamada."""
 
         input_tokens = final_usage.input_tokens

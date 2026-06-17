@@ -1,5 +1,7 @@
 from openai import OpenAI, OpenAIError
 
+from schemas.usage_metadata import UsageMetadata
+
 from .generic_provider import AIProvider, AIProviderError
 
 
@@ -24,7 +26,12 @@ class AzureOpenAIProvider(AIProvider):
                 if event.type == "response.output_text.delta":
                     yield event.delta
                 if event.type == "response.completed":
-                    yield event.response.usage
+                    final_usage = UsageMetadata(
+                        input_tokens=event.response.usage.input_tokens,
+                        output_tokens=event.response.usage.output_tokens,
+                        total_tokens=event.response.usage.total_tokens,
+                    )
+                    yield final_usage
 
         except OpenAIError as e:
             raise AIProviderError(f"Azure OpenAI API error: {e}") from e

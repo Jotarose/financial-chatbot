@@ -2,6 +2,8 @@ from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 
+from schemas.usage_metadata import UsageMetadata
+
 from .generic_provider import AIProvider, AIProviderError
 
 
@@ -40,6 +42,19 @@ class GeminiProvider(AIProvider):
             )
 
             for chunk in response_stream:
+                if chunk.candidates[0].finish_reason:
+                    meta = chunk.usage_metadata
+                    thoughts = meta.thoughts_token_count if meta.thoughts_token_count else 0
+                    # Mapear a tu esquema UsageMetadata
+                    final_usage = UsageMetadata(
+                        input_tokens=meta.prompt_token_count,
+                        output_tokens=meta.candidates_token_count + thoughts,
+                        total_tokens=meta.total_token_count,
+                    )
+
+                    # Enviar el objeto de estadísticas al chatbot
+                    yield final_usage
+
                 yield chunk.text
 
         except APIError as e:
