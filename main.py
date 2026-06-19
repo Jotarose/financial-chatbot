@@ -1,7 +1,6 @@
 from core import ConversationManager, FallbackChatbot, settings
 from core.prompts import FINANCIAL_SYSTEM_PROMPT
 from providers import AzureOpenAIProvider, GeminiProvider, OllamaProvider
-from utils.management_utils import show_commands
 from utils.provider_utils import select_provider
 
 
@@ -24,8 +23,12 @@ def main():
             name="Ollama (Local)",
         ),
     }
+
+    print("Hello from financial-agent!\n")
+
     main_provider, fallback_provider = select_provider(providers)
 
+    print("\n- Configuring the chatbot system ...")
     conversation_manager = ConversationManager(
         system_prompt=FINANCIAL_SYSTEM_PROMPT, max_messages=10
     )
@@ -35,8 +38,8 @@ def main():
         fallback_provider=fallback_provider,
         conversation_manager=conversation_manager,
     )
+    print(f"- Chatbot fully configured with {main_provider.name} as main provider.\n")
 
-    print("Hello from financial-agent!\n")
     chatbot.show_commands()
 
     try:

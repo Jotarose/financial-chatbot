@@ -31,7 +31,7 @@ class FallbackChatbot:
     def clean_history(self):
         self.conversation.clean_history()
 
-    def show_commands():
+    def show_commands(self):
         print("---- Comandos disponibles ----")
         print(
             "- /salir: Salir del programa.\n"

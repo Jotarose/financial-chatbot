@@ -2,12 +2,12 @@ def select_provider(providers: dict):
     providers_names = list(providers.keys())
 
     if len(providers_names) < 2:
-        print("Only one provider available. Using the default provider.")
+        print("\nOnly one provider available. Using the default provider.")
         return (providers[providers_names[0]],)
 
     while True:
-        print(f"Available providers: {', '.join(providers_names)}.")
-        selection = input("Select main provider (or press Enter for default): ").strip()
+        print(f"\nAvailable providers: {', '.join(providers_names)}.")
+        selection = input("- Select main provider (or press Enter for default): ").strip()
 
         # User pressed Enter without typing
         if not selection:
@@ -25,4 +25,4 @@ def select_provider(providers: dict):
             )
             return (main_provider, providers[fallback_provider])
 
-        print(f"Invalid selection '{selection}'. Please try again.")
+        print(f"- Invalid selection '{selection}'. Please try again.")
