@@ -6,7 +6,6 @@ class Settings(BaseSettings):
     # Definimos las variables y su tipo de dato (Pydantic hará la conversión)
     # Si no le ponemos un valor por defecto (como a SECRET_KEY), será OBLIGATORIA
     DATABASE_URL: str
-    SECRET_KEY: str
     DEBUG_MODE: bool = False
     # OpenAI
     OPENAI_API_KEY: str
