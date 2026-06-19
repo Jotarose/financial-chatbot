@@ -47,10 +47,12 @@ class FallbackChatbot:
         total_tokens = final_usage.total_tokens
 
         self.statistics["requests"] += 1
-        self.statistics["total_input_tokens"] += input_tokens
-        self.statistics["total_output_tokens"] += output_tokens
-        self.statistics["total_tokens"] += total_tokens
         self.statistics["usage_time"] += call_time
+
+        if final_usage:
+            self.statistics["total_input_tokens"] += input_tokens
+            self.statistics["total_output_tokens"] += output_tokens
+            self.statistics["total_tokens"] += total_tokens
 
     def generate_streaming_response(self, user_message: str):
         start_time = time.perf_counter()
