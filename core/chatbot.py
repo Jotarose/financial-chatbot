@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from core.conversation import ConversationManager
 from providers import AIProvider, AIProviderError
@@ -19,8 +20,9 @@ class FallbackChatbot:
         self.fallback_provider = fallback_provider
         self.conversation = conversation_manager
         self.statistics = {
-            "requests": 0,
+            "messages": 0,
             "usage_time": 0.0,
+            "start_time": datetime.now(),
             "total_input_tokens": 0,
             "total_output_tokens": 0,
             "total_tokens": 0,
@@ -28,6 +30,22 @@ class FallbackChatbot:
 
     def clean_history(self):
         self.conversation.clean_history()
+
+    def show_commands():
+        print("---- Comandos disponibles ----")
+        print(
+            "- /salir: Salir del programa.\n"
+            "- /limpiar: limpiar el historial de mensajes.\n"
+            "- /cambiar: cambiar el provedor de IA.\n"
+            "- /estadisticas: mostrar estadisticas de uso.\n"
+            "- /ayuda: imprimir los comandos disponibles.\n"
+            "*********************************************\n"
+        )
+
+    def show_statistics(self):
+        print("\nESTADISTICAS DE LA SESION:")
+        for key, value in self.statistics.items():
+            print(f"- {key.capitalize()}: {value}")
 
     def get_providers_names(self) -> list:
         return [self.main_provider.get_provider_name(), self.fallback_provider.get_provider_name()]
@@ -46,7 +64,7 @@ class FallbackChatbot:
         output_tokens = final_usage.output_tokens
         total_tokens = final_usage.total_tokens
 
-        self.statistics["requests"] += 1
+        self.statistics["messages"] += 1
         self.statistics["usage_time"] += call_time
 
         if final_usage:

@@ -37,7 +37,7 @@ def main():
     )
 
     print("Hello from financial-agent!\n")
-    show_commands()
+    chatbot.show_commands()
 
     try:
         while True:
@@ -46,7 +46,8 @@ def main():
             # (/estadisticas, /limpiar, /cambiar, /ayuda, /salir).
             match user_input:
                 case "/salir":
-                    print("Saliendo del chatbot financiero ...")
+                    chatbot.show_statistics()
+                    print("\nSaliendo del chatbot financiero ...")
                     break
 
                 case "/limpiar":
@@ -68,10 +69,7 @@ def main():
                     continue
 
                 case "/estadisticas":
-                    statistics = chatbot.get_statistics()
-                    print("\nESTADISTICAS DE LA SESION:")
-                    for key, value in statistics.items():
-                        print(f"- {key.capitalize()}: {value}")
+                    chatbot.show_statistics()
                     continue
 
                 case _:
