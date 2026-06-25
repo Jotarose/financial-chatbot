@@ -1,5 +1,3 @@
-# schemas/nota.py
-
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
