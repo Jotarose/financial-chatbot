@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class ConversationManager:
     """Manages LLM conversation history with a sliding window limit.
 
@@ -49,3 +52,30 @@ class ConversationManager:
 
     def add_message(self, role: str, message: str):
         self.history.append({"role": role, "content": message})
+
+    def add_assistant_tool_call(self, message_content: str | None, raw_tool_calls: Any):
+        """
+        Registra la petición del modelo para usar una o varias herramientas.
+        Requiere el objeto crudo de la API para mantener el formato interno.
+        """
+        self.history.append(
+            {
+                "role": "assistant",
+                "content": message_content,
+                "tool_calls": raw_tool_calls,
+            }
+        )
+
+    def add_tool_result(self, tool_call_id: str, tool_name: str, result: str):
+        """
+        Registra la salida computacional de la herramienta ejecutada localmente.
+        El tool_call_id debe coincidir exactamente con el emitido por el modelo.
+        """
+        self.history.append(
+            {
+                "role": "tool",
+                "tool_call_id": tool_call_id,
+                "name": tool_name,
+                "content": result,
+            }
+        )
