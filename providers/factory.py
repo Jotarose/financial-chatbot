@@ -1,4 +1,4 @@
-from core import settings
+from config.settings import settings
 
 from .azureopenai_provider import AzureOpenAIProvider
 from .gemini_provider import GeminiProvider

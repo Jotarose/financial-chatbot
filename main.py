@@ -1,4 +1,5 @@
-from core import ConversationManager, FallbackChatbot
+from core.chatbot import FallbackChatbot
+from core.conversation import ConversationManager
 from core.prompts import FINANCIAL_SYSTEM_PROMPT
 from database import init_db
 from providers.factory import create_providers
