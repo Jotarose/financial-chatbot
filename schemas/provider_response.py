@@ -10,8 +10,8 @@ class ToolCall(BaseModel):
         ...,
         description="Identificador único de la llamada a la herramienta proporcionado por la API.",
     )
-    nombre: str = Field(..., description="Nombre de la función a ejecutar.")
-    argumentos: dict[str, Any] = Field(
+    function_name: str = Field(..., description="Nombre de la función a ejecutar.")
+    arguments: dict[str, Any] = Field(
         ..., description="Argumentos parseados en formato diccionario listos para inyección."
     )
 
