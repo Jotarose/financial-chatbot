@@ -1,31 +1,15 @@
-from core import ConversationManager, FallbackChatbot, settings
+from core import ConversationManager, FallbackChatbot
 from core.prompts import FINANCIAL_SYSTEM_PROMPT
-from providers import AzureOpenAIProvider, GeminiProvider, OllamaProvider
+from database import init_db
+from providers.factory import create_providers
 from utils.provider_utils import select_provider
 
 
 def main():
 
-    # Configure all the setup
-    providers = {
-        "gemini": GeminiProvider(
-            api_key=settings.GEMINI_API_KEY,
-            name="Gemini",
-        ),
-        "azureopenai": AzureOpenAIProvider(
-            api_key=settings.OPENAI_API_KEY,
-            endpoint=settings.OPENAI_BASE_URL,
-            name="Azure OpenAI",
-        ),
-        "ollama": OllamaProvider(
-            api_key=settings.OLLAMA_API_KEY,
-            endpoint=settings.OLLAMA_BASE_URL,
-            name="Ollama (Local)",
-        ),
-    }
-
     print("Hello from financial-agent!\n")
-
+    # Configure all the setup
+    providers = create_providers()
     main_provider, fallback_provider = select_provider(providers)
 
     print("\n- Configuring the chatbot system ...")
@@ -68,7 +52,7 @@ def main():
                     continue
 
                 case "/ayuda":
-                    show_commands()
+                    chatbot.show_commands()
                     continue
 
                 case "/estadisticas":
@@ -95,4 +79,7 @@ def main():
 
 
 if __name__ == "__main__":
+    init_db()
+    print("System: BBDD started succesfully.")
+
     main()
