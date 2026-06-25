@@ -16,5 +16,5 @@ SessionLocal = sessionmaker(
 )
 
 
-class Base(declarative_base()):
+class Base(declarative_base):
     pass
