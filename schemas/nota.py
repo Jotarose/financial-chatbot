@@ -1,4 +1,20 @@
+# schemas/nota.py
+
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
+
+
+class CategoriaNota(StrEnum):
+    FINANZAS = "finanzas"
+    PRESUPUESTO = "presupuesto"
+    INVERSIONES = "inversiones"
+    GASTOS = "gastos"
+    INGRESOS = "ingresos"
+    OBJETIVOS = "objetivos"
+    DEUDAS = "deudas"
+    AHORROS = "ahorros"
+    GENERAL = "general"
 
 
 class CrearNota(BaseModel):
@@ -15,8 +31,7 @@ class CrearNota(BaseModel):
         description="Contenido de la nota",
     )
 
-    categoria: str = Field(
-        default="general",
-        max_length=50,
-        description="Categoría de la nota (por defecto 'general')",
+    categoria: CategoriaNota = Field(
+        default=CategoriaNota.GENERAL,
+        description="Categoría de la nota. Restringido a los valores enumerados.",
     )
