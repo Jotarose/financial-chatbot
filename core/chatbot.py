@@ -153,7 +153,7 @@ class FallbackChatbot:
                     else:
                         final_usage = chunk
 
-        # It can fail in the middle of the stream, so catch the error and fallback to the 2provider
+        # It can fail in the middle of the stream
         except AIProviderError as e:
             print(f"Main provider failed with error: {e}. Falling back to secondary provider.")
 
