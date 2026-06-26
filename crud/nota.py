@@ -21,12 +21,15 @@ def crear_nota(db: Session, data: CrearNota):
         raise e  # <- Pasa el error a la capa superior
 
 
-def leer_notas(db: Session) -> list[Nota]:
+def leer_notas(db: Session, limite: int | None = None) -> list[Nota]:
     try:
-        return db.query(Nota).order_by(Nota.fecha_creacion.desc()).all()
+        query = db.query(Nota).order_by(Nota.fecha_creacion.desc())
+
+        if limite is not None and limite > 0:
+            query = query.limit(limite)
+
+        return query.all()
     except SQLAlchemyError as e:
-        # Las lecturas no bloquean la sesión igual que las escrituras,
-        # pero es buena práctica capturarlas.
         raise e
 
 
