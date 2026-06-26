@@ -1,9 +1,12 @@
+import sys
 import time
+import traceback
 from datetime import datetime
 
 from core.conversation import ConversationManager
 from providers import AIProvider, AIProviderError
 from schemas.usage_metadata import UsageMetadata
+from tools.registry import tool_router
 
 
 class FallbackChatbot:
@@ -77,8 +80,64 @@ class FallbackChatbot:
 
         # Add the user's message to the conversation history
         self.conversation.add_message("user", user_message)
-        history = self.conversation.get_api_history()
 
+        # FASE 1: Resolucion logica, hay o no hay tools
+        max_iterations = 3
+        current_iteration = 0
+
+        while current_iteration < max_iterations:
+            history = self.conversation.get_api_history()
+
+            try:
+                # Evaluación síncrona
+                provider_response = self.main_provider.evaluate_tools(history)
+            except AIProviderError as e:
+                print(f"Error evaluando tools: {e}")
+                break  # Rompe el bucle lógico ante fallo de red/API, intenta recuperar en Fase 2
+
+            if provider_response.ha_pedido_usar_tools():
+                # Registro del estado inmutable
+                self.conversation.add_assistant_tool_call(
+                    message_content=provider_response.content,
+                    raw_tool_calls=provider_response.raw_tool_calls_data,
+                )
+
+                # Ejecución enrutada
+                for tool_call in provider_response.tool_calls:
+                    funcion_ejecutora = tool_router.get(tool_call.function_name)
+
+                    if funcion_ejecutora:
+                        try:
+                            # Inyección directa de argumentos validados por Pydantic
+                            resultado = funcion_ejecutora(**tool_call.arguments)
+                            resultado_str = str(resultado)
+                        except Exception as e:
+                            # resultado_str = f"Error interno ejecutando la herramienta: {str(e)}"
+                            print(f"Tipo de excepción: {type(e).__name__}")
+                            print(f"Mensaje: {e}")
+                            traceback.print_exc(file=sys.stdout)
+                            raise
+                    else:
+                        resultado_str = (
+                            f"Herramienta '{tool_call.function_name}' no encontrada en el registro."
+                        )
+
+                    # Registro del resultado atado al identificador
+                    self.conversation.add_tool_result(
+                        tool_call_id=tool_call.id,
+                        tool_name=tool_call.function_name,
+                        result=resultado_str,
+                    )
+
+                current_iteration += 1
+                continue
+            else:
+                # Resolución computacional completada
+                self.conversation.add_message(role="assistant", message=provider_response.content)
+                break
+
+        # FASE 2: Emision respuesta final al usuario (streaming)
+        history = self.conversation.get_api_history()
         full_response = ""
         final_usage = None
 

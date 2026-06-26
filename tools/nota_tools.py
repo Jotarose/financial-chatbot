@@ -3,7 +3,10 @@ from database.session import get_db_session
 from schemas.nota import CrearNota
 
 
-def crear_nota_tool(data: CrearNota) -> dict:
+def crear_nota_tool(**kwargs) -> dict:
+
+    data = CrearNota(**kwargs)
+
     with get_db_session() as db:
         nota = crear_nota(db, data)
 
