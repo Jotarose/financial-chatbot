@@ -4,11 +4,20 @@ from schemas.nota import BorrarNota, ContarNotas, CrearNota, LeerNotas
 
 from .nota_tools import borrar_nota_tool, contar_notas_tool, crear_nota_tool, leer_notas_tool
 
-tools = [
+
+def _to_responses_format(tool: dict) -> dict:
+    """Convierte el formato chat.completions al formato aplanado de la Responses API."""
+    if "function" in tool:
+        return {
+            "type": "function",
+            **tool["function"],
+        }
+    return tool  # Ya está en el formato correcto
+
+
+_raw_tools = [
     pydantic_function_tool(
-        CrearNota,
-        name="crear_nota",
-        description="Crea una nota en la base de datos.",
+        CrearNota, name="crear_nota", description="Crea una nota en la base de datos."
     ),
     pydantic_function_tool(
         LeerNotas,
@@ -23,10 +32,11 @@ tools = [
     pydantic_function_tool(
         BorrarNota,
         name="borrar_nota",
-        description="""Activa esta herramienta SIEMPRE que el usuario pida eliminar o borrar una nota. IMPORTANTE: Esta acción es permanente. Si el usuario no ha proporcionado un ID explícito, primero usa 'leer_notas' para identificar el ID correcto y solicita confirmación si hay ambigüedad.""",
+        description="Activa esta herramienta SIEMPRE que el usuario pida eliminar o borrar una nota. IMPORTANTE: Esta acción es permanente. Si el usuario no ha proporcionado un ID explícito, primero usa 'leer_notas' para identificar el ID correcto y solicita confirmación si hay ambigüedad.",
     ),
 ]
 
+tools = [_to_responses_format(t) for t in _raw_tools]
 
 tool_router = {
     "crear_nota": crear_nota_tool,

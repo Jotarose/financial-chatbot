@@ -17,66 +17,47 @@ class AzureOpenAIProvider(AIProvider):
         self.client = OpenAI(api_key=api_key, base_url=endpoint)
         self.tools = tools
 
-    def _to_responses(self, messages: list) -> list:
-        clean = []
-
-        for m in messages:
-            role = m.get("role")
-            content = m.get("content")
-
-            # 1. eliminar mensajes inválidos
-            if content is None:
-                continue
-
-            # 2. eliminar tool calls (clave)
-            if m.get("tool_calls"):
-                continue
-
-            # 3. eliminar tool messages (opcional pero recomendado aquí)
-            if role == "tool":
-                continue
-
-            # 4. solo roles válidos
-            if role not in ["user", "assistant", "system", "developer"]:
-                continue
-
-            clean.append({"role": role, "content": content})
-
-        return clean
-
     def evaluate_tools(self, messages: list) -> ProviderResponse:
         try:
-            response = self.client.chat.completions.create(
+            response = self.client.responses.create(
                 model="gpt-5.4-mini",
-                messages=messages,
+                input=messages,
                 tools=self.tools,
+                store=False,
                 tool_choice="auto" if tools else "none",
                 stream=False,
             )
 
-            message = response.choices[0].message
             parsed_tool_calls = []
+            text_content = None
 
-            # Procesamiento adaptado a la estructura de chat.completions
-            if message.tool_calls:
-                for tool in message.tool_calls:
+            # response.output es una lista de items tipados
+            for item in response.output:
+                if item.type == "function_call":
                     tool_call = ToolCall(
-                        id=tool.id,
-                        function_name=tool.function.name,
-                        arguments=json.loads(tool.function.arguments),
+                        id=item.call_id,
+                        function_name=item.name,
+                        arguments=json.loads(item.arguments),
                     )
-
                     parsed_tool_calls.append(tool_call)
 
+                elif item.type == "message":
+                    # Saco el texto del assistant
+                    for content_part in item.content:
+                        if content_part.type == "output_text":
+                            text_content = content_part.text
+
             return ProviderResponse(
-                content=message.content,
+                content=text_content,
                 tool_calls=parsed_tool_calls,
-                raw_tool_calls_data=message.tool_calls,  # Se almacena la lista de tool_calls nativa
+                # Guardamos los items crudos de function_call para el historial
+                raw_tool_calls_data=[
+                    item for item in response.output if item.type == "function_call"
+                ],
             )
 
         except OpenAIError as e:
             raise AIProviderError(f"Error en evaluación síncrona (Azure OpenAI): {e}") from e
-            # 1. Imprime un texto llamativo en la salida normal para saber que entró al except
 
         except Exception as e:
             print(f"\n[!!!] ERROR ATRAPADO: {e}\n", file=sys.stdout)
@@ -87,35 +68,29 @@ class AzureOpenAIProvider(AIProvider):
     def generate_streaming_response(self, messages: list, max_output_tokens: int = 3000):
 
         try:
-            response_stream = self.client.chat.completions.create(
+            stream = self.client.responses.create(
                 model="gpt-5.4-mini",
-                messages=messages,
+                input=messages,
                 tools=self.tools,
-                tool_choice="auto" if tools else "none",
-                temperature=0.7,
-                top_p=0.9,
-                max_completion_tokens=max_output_tokens,
+                store=False,
+                max_output_tokens=max_output_tokens,
                 stream=True,
-                stream_options={"include_usage": True},
             )
 
-            final_usage = None
+            for event in stream:
+                # Texto delta
+                if event.type == "response.output_text.delta":
+                    yield event.delta
 
-            for chunk in response_stream:
-                # 1. Validación estricta de la matriz de inferencia
-                if hasattr(chunk, "choices") and len(chunk.choices) > 0:
-                    delta = chunk.choices[0].delta
-                    if hasattr(delta, "content") and delta.content:
-                        yield delta.content
-
-                # 2. Extracción aislada de métricas (el chunk final no tiene 'choices')
-                if hasattr(chunk, "usage") and chunk.usage is not None:
-                    final_usage = UsageMetadata(
-                        input_tokens=chunk.usage.prompt_tokens,
-                        output_tokens=chunk.usage.completion_tokens,
-                        total_tokens=chunk.usage.total_tokens,
-                    )
-                    yield final_usage
+                # Métricas finales
+                elif event.type == "response.completed":
+                    usage = event.response.usage
+                    if usage:
+                        yield UsageMetadata(
+                            input_tokens=usage.input_tokens,
+                            output_tokens=usage.output_tokens,
+                            total_tokens=usage.total_tokens,
+                        )
 
         except OpenAIError as e:
             # raise AIProviderError(f"Azure OpenAI API error: {e}") from e
