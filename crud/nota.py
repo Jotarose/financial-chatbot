@@ -38,3 +38,25 @@ def contar_notas(db: Session) -> int:
         return db.query(Nota).count()
     except SQLAlchemyError as e:
         raise e
+
+
+def borrar_nota(db: Session, id: int) -> dict:
+    """
+    Intenta borrar una nota por su ID.
+    Retorna True si se borró con éxito, False si no se encontró.
+    """
+    try:
+        # Buscamos la nota primero
+        nota = db.query(Nota).filter(Nota.id == id).first()
+
+        if not nota:
+            return {"success": False}
+
+        db.delete(nota)
+        db.commit()
+        return {"success": True, "id": nota.id, "titulo": nota.titulo}
+
+    except SQLAlchemyError as e:
+        # Si algo falla en la BBDD (bloqueo, desconexión, etc), revertimos
+        db.rollback()
+        raise e

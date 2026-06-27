@@ -1,9 +1,9 @@
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from crud.nota import contar_notas, crear_nota, leer_notas
+from crud.nota import borrar_nota, contar_notas, crear_nota, leer_notas
 from database.session import get_db_session
-from schemas.nota import CrearNota, LeerNotas
+from schemas.nota import BorrarNota, CrearNota, LeerNotas
 
 
 def crear_nota_tool(**kwargs) -> dict:
@@ -87,5 +87,39 @@ def contar_notas_tool(**kwargs) -> dict:
         return {
             "estado": "error",
             "motivo": "Fallo interno ejecutando el conteo",
+            "detalle_tecnico": str(e),
+        }
+
+
+def borrar_nota_tool(**kwargs) -> dict:
+    try:
+        with get_db_session() as db:
+            data = BorrarNota(**kwargs)
+            nota_id = data.id  # No puedo puedo pasarle el objeto BorrarNota
+
+            result = borrar_nota(db, nota_id)
+
+            if result["success"]:
+                return {
+                    "estado": "exito",
+                    "nota_id": result["id"],
+                    "nota_titulo": result["titulo"],
+                }
+            else:
+                return {
+                    "estado": "error",
+                    "motivo": f"No se encontro ninguna nota con el id: {data}",
+                }
+
+    except SQLAlchemyError as db_error:
+        return {
+            "estado": "error",
+            "motivo": "Fallo de conexión o lectura en la base de datos",
+            "detalle_tecnico": str(db_error),
+        }
+    except Exception as e:
+        return {
+            "estado": "error",
+            "motivo": "Fallo interno ejecutando la operacion de eliminacion.",
             "detalle_tecnico": str(e),
         }

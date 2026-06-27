@@ -1,8 +1,8 @@
 from openai import pydantic_function_tool
 
-from schemas.nota import ContarNotas, CrearNota, LeerNotas
+from schemas.nota import BorrarNota, ContarNotas, CrearNota, LeerNotas
 
-from .nota_tools import contar_notas_tool, crear_nota_tool, leer_notas_tool
+from .nota_tools import borrar_nota_tool, contar_notas_tool, crear_nota_tool, leer_notas_tool
 
 tools = [
     pydantic_function_tool(
@@ -20,6 +20,11 @@ tools = [
         name="contar_notas",
         description="Activa esta herramienta SIEMPRE que el usuario pregunte por la cantidad, el total o cuántas notas tiene guardadas.",
     ),
+    pydantic_function_tool(
+        BorrarNota,
+        name="borrar_nota",
+        description="""Activa esta herramienta SIEMPRE que el usuario pida eliminar o borrar una nota. IMPORTANTE: Esta acción es permanente. Si el usuario no ha proporcionado un ID explícito, primero usa 'leer_notas' para identificar el ID correcto y solicita confirmación si hay ambigüedad.""",
+    ),
 ]
 
 
@@ -27,4 +32,5 @@ tool_router = {
     "crear_nota": crear_nota_tool,
     "leer_notas": leer_notas_tool,
     "contar_notas": contar_notas_tool,
+    "borrar_nota": borrar_nota_tool,
 }

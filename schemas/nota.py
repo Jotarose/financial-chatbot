@@ -46,3 +46,10 @@ class ContarNotas(BaseModel):
     """Esquema vacío. No requiere parámetros de entrada."""
 
     pass
+
+
+class BorrarNota(BaseModel):
+    id: int = Field(
+        ...,
+        description="ID único de la nota que se desea eliminar. Debe obtenerse previamente mediante 'leer_notas'.",
+    )
