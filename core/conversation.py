@@ -75,7 +75,6 @@ class ConversationManager:
             {
                 "role": "tool",
                 "tool_call_id": tool_call_id,
-                "name": tool_name,
                 "content": result,
             }
         )

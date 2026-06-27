@@ -86,8 +86,8 @@ class FallbackChatbot:
         current_iteration = 0
 
         while current_iteration < max_iterations:
-            history = self.conversation.get_api_history()
-
+            # history = self.conversation.get_api_history()
+            history = self.conversation.get_full_history()
             try:
                 # Evaluación síncrona
                 provider_response = self.main_provider.evaluate_tools(history)
@@ -111,6 +111,7 @@ class FallbackChatbot:
                             # Inyección directa de argumentos validados por Pydantic
                             resultado = funcion_ejecutora(**tool_call.arguments)
                             resultado_str = str(resultado)
+                            print(f"- Ejecutando: {tool_call.function_name}")
                         except Exception as e:
                             # resultado_str = f"Error interno ejecutando la herramienta: {str(e)}"
                             print(f"Tipo de excepción: {type(e).__name__}")
@@ -125,7 +126,6 @@ class FallbackChatbot:
                     # Registro del resultado atado al identificador
                     self.conversation.add_tool_result(
                         tool_call_id=tool_call.id,
-                        tool_name=tool_call.function_name,
                         result=resultado_str,
                     )
 
