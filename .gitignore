@@ -15,6 +15,7 @@ wheels/
 
 # Local config
 .python-version
+.vscode/
 
 # Notebooks
 lab_proveedores_IA.ipynb
